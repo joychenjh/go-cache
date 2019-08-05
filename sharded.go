@@ -19,7 +19,7 @@ import (
 //
 // See cache_test.go for a few benchmarks.
 
-type unexportedShardedCache struct {
+type ShardedBucketCache struct {
 	*shardedCache
 }
 
@@ -178,12 +178,12 @@ func newShardedCache(n int, de time.Duration) *shardedCache {
 	return sc
 }
 
-func unexportedNewSharded(defaultExpiration, cleanupInterval time.Duration, shards int) *unexportedShardedCache {
+func NewShardedBucketCache(defaultExpiration, cleanupInterval time.Duration, shards int) *ShardedBucketCache {
 	if defaultExpiration == 0 {
 		defaultExpiration = -1
 	}
 	sc := newShardedCache(shards, defaultExpiration)
-	SC := &unexportedShardedCache{sc}
+	SC := &ShardedBucketCache{sc}
 	if cleanupInterval > 0 {
 		runShardedJanitor(sc, cleanupInterval)
 		runtime.SetFinalizer(SC, stopShardedJanitor)
