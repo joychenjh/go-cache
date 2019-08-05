@@ -141,7 +141,7 @@ func (j *shardedJanitor) Run(sc *shardedCache) {
 	}
 }
 
-func stopShardedJanitor(sc *unexportedShardedCache) {
+func stopShardedJanitor(sc *ShardedBucketCache) {
 	sc.janitor.stop <- true
 }
 

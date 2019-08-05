@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"reflect"
 	"strconv"
 	"sync"
 	"testing"
@@ -27,9 +28,18 @@ var shardedKeys = []string{
 }
 
 func TestShardedCache(t *testing.T) {
-	tc := unexportedNewSharded(DefaultExpiration, 0, 13)
+	tc := NewShardedBucketCache(DefaultExpiration, 0, 13)
 	for _, v := range shardedKeys {
-		tc.Set(v, "value", DefaultExpiration)
+		tc.Set(v, v, DefaultExpiration)
+
+		_mv , ok := tc.Get(v)
+		if !ok {
+			t.Error("no find key:", v)
+		} else {
+			if !reflect.DeepEqual(v, _mv) {
+				t.Errorf("DeepEqual key:%v err", v)
+			}
+		}
 	}
 }
 
@@ -43,7 +53,7 @@ func BenchmarkShardedCacheGetNotExpiring(b *testing.B) {
 
 func benchmarkShardedCacheGet(b *testing.B, exp time.Duration) {
 	b.StopTimer()
-	tc := unexportedNewSharded(exp, 0, 10)
+	tc := NewShardedBucketCache(exp, 0, 10)
 	tc.Set("foobarba", "zquux", DefaultExpiration)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
@@ -62,7 +72,7 @@ func BenchmarkShardedCacheGetManyConcurrentNotExpiring(b *testing.B) {
 func benchmarkShardedCacheGetManyConcurrent(b *testing.B, exp time.Duration) {
 	b.StopTimer()
 	n := 10000
-	tsc := unexportedNewSharded(exp, 0, 20)
+	tsc := NewShardedBucketCache(exp, 0, 20)
 	keys := make([]string, n)
 	for i := 0; i < n; i++ {
 		k := "foo" + strconv.Itoa(n)
